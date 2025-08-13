@@ -27,7 +27,7 @@ public class UserServicempl implements UserService {
     }
 
     public UserDto update(Long userId, UpdateUserRequest request) {
-        if (request == null){
+        if (request == null) {
             throw new NotFoundException("Пользователь не найден");
         }
         User user = userStorage.getById(userId);
