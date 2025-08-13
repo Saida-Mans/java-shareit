@@ -40,7 +40,7 @@ public class ItemServiceImpl implements ItemService {
         if (item == null) {
             throw new NotFoundException("Item id = " + itemId + " не найден");
         }
-        if (item.getOwner().getId().equals(userId)) {
+        if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Владелец с таким id " + userId + "не найден");
         }
         ItemMapper.updateItemFromDto(itemDto, item);
