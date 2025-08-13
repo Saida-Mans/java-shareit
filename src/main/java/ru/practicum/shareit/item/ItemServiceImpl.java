@@ -37,11 +37,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = repository.getById(itemId);
-        if(item == null){
+        if (item == null) {
             throw new NotFoundException("Item id = " + itemId + " не найден");
         }
-        if (item.getOwner().getId() != userId){
-            throw new NotFoundException("Владелец с таким id "+ userId + "не найден");
+        if (item.getOwner().getId() != userId) {
+            throw new NotFoundException("Владелец с таким id " + userId + "не найден");
         }
         ItemMapper.updateItemFromDto(itemDto, item);
         repository.update(item);

@@ -13,8 +13,8 @@ public class UserServicempl implements UserService {
 
     private final UserStorage userStorage;
 
-    public UserDto create (NewUserRequest request) {
-      if(request == null) {
+    public UserDto create(NewUserRequest request) {
+      if (request == null) {
           throw new NotFoundException("Пользователь не найден");
       }
       User user = UserMapper.mapToUser(request);
@@ -26,8 +26,8 @@ public class UserServicempl implements UserService {
         return UserMapper.toUserDto(userStorage.create(user));
     }
 
-    public UserDto update (Long userId, UpdateUserRequest request) {
-        if(request == null){
+    public UserDto update(Long userId, UpdateUserRequest request) {
+        if (request == null){
             throw new NotFoundException("Пользователь не найден");
         }
         User user = userStorage.getById(userId);
@@ -44,15 +44,15 @@ public class UserServicempl implements UserService {
         return UserMapper.toUserDto(userStorage.update(user));
     }
 
-    public UserDto getById (Long userId) {
-        if(userId == null) {
+    public UserDto getById(Long userId) {
+        if (userId == null) {
             throw new NotFoundException("Пользователь c таким id " + userId + " не найден");
         }
         return UserMapper.toUserDto(userStorage.getById(userId));
     }
 
-    public UserDto delete (Long userId) {
-        if(userId == null) {
+    public UserDto delete(Long userId) {
+        if (userId == null) {
             throw new NotFoundException("Пользователь c таким id " + userId + " не найден");
         }
         return UserMapper.toUserDto(userStorage.delete(userId));

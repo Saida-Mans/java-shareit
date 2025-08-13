@@ -18,7 +18,7 @@ public class UserStorage {
         return emails;
     }
 
-    public User create (User user) {
+    public User create(User user) {
         user.setId(getNextId());
         emails.add(user.getEmail());
         users.put(user.getId(), user);
@@ -29,11 +29,11 @@ public class UserStorage {
         return users.get(userId);
     }
 
-    public User update (User user) {
+    public User update(User user) {
         return users.put(user.getId(), user);
     }
 
-    public User delete (Long userId) {
+    public User delete(Long userId) {
         User user = users.get(userId);
         emails.remove(user.getEmail());
         users.remove(userId, user);
@@ -45,6 +45,6 @@ public class UserStorage {
                 .stream()
                 .max(Long::compareTo)
                 .orElse(0L);
-        return ++currentMaxId+1;
+        return ++currentMaxId + 1;
     }
 }

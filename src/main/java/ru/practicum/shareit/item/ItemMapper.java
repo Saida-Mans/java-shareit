@@ -34,4 +34,5 @@ public class ItemMapper {
         if (dto.getAvailable() != null) {
             item.setAvailable(dto.getAvailable());
         }
-} }
+    }
+}

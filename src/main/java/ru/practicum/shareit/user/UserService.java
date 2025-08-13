@@ -6,11 +6,11 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 public interface UserService {
 
-    UserDto create (NewUserRequest request);
+    UserDto create(NewUserRequest request);
 
-    UserDto update (Long userId, UpdateUserRequest request);
+    UserDto update(Long userId, UpdateUserRequest request);
 
-    UserDto getById (Long userId);
+    UserDto getById(Long userId);
 
-    UserDto delete (Long userId);
+    UserDto delete(Long userId);
 }
