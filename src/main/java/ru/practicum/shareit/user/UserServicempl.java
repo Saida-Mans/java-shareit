@@ -14,15 +14,11 @@ public class UserServicempl implements UserService {
     private final UserStorage userStorage;
 
     public UserDto create(NewUserRequest request) {
-      if (request == null) {
-          throw new NotFoundException("Пользователь не найден");
-      }
-      User user = UserMapper.mapToUser(request);
-      String userEmail = user.getEmail();
-        if (userStorage.getEmails().contains(userEmail)) {
-            throw new RuntimeException("Email уже зарегистрирован");
+        String email = request.getEmail();
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email не может быть пустым");
         }
-        userStorage.getEmails().add(userEmail);
+        User user = UserMapper.mapToUser(request);
         return UserMapper.toUserDto(userStorage.create(user));
     }
 

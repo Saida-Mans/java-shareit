@@ -24,7 +24,6 @@ public class UserMapper {
         if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }
-
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             user.setEmail(request.getEmail());
         }

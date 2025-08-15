@@ -27,4 +27,11 @@ public class ErrorHandler {
         public ErrorResponse handleUnexpectedError(final RuntimeException exception) {
                 return new ErrorResponse("Произошла непредвиденная ошибка", exception.getMessage());
         }
+
+        @ExceptionHandler
+        @ResponseStatus(HttpStatus.CONFLICT)
+        public ErrorResponse handleConflictError(final ConflictException exception) {
+                return new ErrorResponse("Произошла ошибка", exception.getMessage());
+        }
+
 }

@@ -1,50 +1,17 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.stereotype.Repository;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-@Repository
-public class UserStorage {
+public interface UserStorage {
 
-    private final Map<Long, User> users = new HashMap<>();
+    User create(User user);
 
-    private final Set<String> emails = new HashSet<>();
+    User getById(Long userId);
 
-    public Set<String> getEmails() {
-        return emails;
-    }
+    User update(User user);
 
-    public User create(User user) {
-        user.setId(getNextId());
-        emails.add(user.getEmail());
-        users.put(user.getId(), user);
-        return user;
-    }
+    Set<String> getEmails();
 
-    public User getById(Long userId) {
-        return users.get(userId);
-    }
-
-    public User update(User user) {
-        return users.put(user.getId(), user);
-    }
-
-    public User delete(Long userId) {
-        User user = users.get(userId);
-        emails.remove(user.getEmail());
-        users.remove(userId, user);
-        return user;
-    }
-
-    private Long getNextId() {
-        Long currentMaxId = users.keySet()
-                .stream()
-                .max(Long::compareTo)
-                .orElse(0L);
-        return ++currentMaxId + 1;
-    }
+    User delete(Long userId);
 }

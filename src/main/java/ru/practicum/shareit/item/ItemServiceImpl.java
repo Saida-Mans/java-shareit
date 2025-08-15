@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final UserStorage userStorage;
-    private final ItemRepository repository;
+    private final ItemStorage repository;
 
     @Override
     public ItemDto create(Long id, ItemDto itemDto) {
@@ -50,9 +50,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto itemById(Long userId, Long itemId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("X-Sharer-User-Id не передан");
-        }
         User owner = userStorage.getById(userId);
         if (owner == null) {
             throw new NotFoundException("User id = " + userId + " не найден");

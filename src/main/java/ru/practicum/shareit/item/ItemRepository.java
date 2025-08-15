@@ -4,11 +4,12 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
-public class ItemRepository {
+public class ItemRepository implements ItemStorage {
 
-    Map<Long, Item> items = new HashMap<>();
+   private Map<Long, Item> items = new HashMap<>();
 
     public Item create(Item item) {
         item.setId(getNextId());
@@ -37,14 +38,10 @@ public class ItemRepository {
 
     public List<Item> search(String text) {
         String lowerText = text.toLowerCase();
-        List<Item> listItem = new ArrayList<>();
-        for (Item item : items.values()) {
-            if (Boolean.TRUE.equals(item.isAvailable()) &&
-                    (item.getName() != null && item.getName().toLowerCase().contains(lowerText) ||
-                            item.getDescription() != null && item.getDescription().toLowerCase().contains(lowerText))) {
-                listItem.add(item);
-            }
-    }
+        List<Item> listItem = items.values().stream()
+                .filter(i -> Boolean.TRUE.equals(i.isAvailable()))
+                .filter(i -> (i.getName() != null && i.getName().toLowerCase().contains(lowerText)) || (i.getDescription() != null && i.getDescription().toLowerCase().contains(lowerText)))
+                .collect(Collectors.toList());
         return listItem;
     }
 
