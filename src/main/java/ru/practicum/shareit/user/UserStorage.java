@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import java.util.Optional;
 import java.util.Set;
 
 public interface UserStorage {
