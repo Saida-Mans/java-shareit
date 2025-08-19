@@ -12,7 +12,7 @@ public class UserRepository implements UserStorage {
     private final Set<String> emails = new HashSet<>();
 
     public Set<String> getEmails() {
-        return emails;
+        return new HashSet<>(emails);
     }
 
     public User create(User user) {
