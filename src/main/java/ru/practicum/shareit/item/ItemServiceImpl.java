@@ -75,11 +75,9 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::toCommentDto)
                 .collect(Collectors.toList());
         LocalDateTime now = LocalDateTime.now();
-        Booking lastBooking = bookingStorage.
-                findFirstByItemIdAndEndBeforeOrderByEndDesc(itemId, now)
+        Booking lastBooking = bookingStorage.findFirstByItemIdAndEndBeforeOrderByEndDesc(itemId, now)
                 .orElse(null);
-        Booking nextBooking = bookingStorage.
-                findFirstByItemIdAndStartAfterOrderByStartAsc(itemId, now)
+        Booking nextBooking = bookingStorage.findFirstByItemIdAndStartAfterOrderByStartAsc(itemId, now)
                 .orElse(null);
         return new ItemWithCommentDto(
                 item.getId(),
@@ -121,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = repository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item id=" + itemId + " не найден"));
         boolean booking = bookingStorage.existsApprovedBooking(itemId, userId, Status.APPROVED);
-        if(!booking){
+        if (!booking) {
             throw new IllegalArgumentException("Cannot comment on unapproved booking");
         }
         Comment comment = ItemMapper.toComment(commentDto, author, item);
