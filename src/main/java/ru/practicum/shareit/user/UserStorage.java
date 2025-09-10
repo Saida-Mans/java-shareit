@@ -1,16 +1,8 @@
 package ru.practicum.shareit.user;
 
-import java.util.Set;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserStorage {
+public interface UserStorage extends JpaRepository<User, Long> {
 
-    User create(User user);
-
-    User getById(Long userId);
-
-    User update(User user);
-
-    Set<String> getEmails();
-
-    User delete(Long userId);
+    boolean existsByEmail(String email);
 }

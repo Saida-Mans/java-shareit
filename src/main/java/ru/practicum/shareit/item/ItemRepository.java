@@ -6,8 +6,9 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 @Repository
-public class ItemRepository implements ItemStorage {
+public class ItemRepository  {
 
    private Map<Long, Item> items = new HashMap<>();
 
