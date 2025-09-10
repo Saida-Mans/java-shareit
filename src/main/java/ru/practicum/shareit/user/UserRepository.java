@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;

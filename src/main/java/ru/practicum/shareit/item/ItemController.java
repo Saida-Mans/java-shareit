@@ -53,6 +53,8 @@ public static final String USER_ID_HEADER = "X-Sharer-User-Id";
    @PostMapping("/{itemId}/comment")
    public CommentDto createComment(@RequestHeader(USER_ID_HEADER) Long userId, @PathVariable Long itemId,
                                 @Valid @RequestBody CommentDto commentDto) {
-    return itemService.createComment(userId, itemId, commentDto); }
+    return itemService.createComment(userId, itemId, commentDto);
+    }
 }
+
 
