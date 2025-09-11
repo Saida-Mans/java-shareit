@@ -1,15 +1,20 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemStorage;
+import ru.practicum.shareit.item.repository.ItemStorage;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserStorage;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +30,7 @@ public class BookingServicempl implements BookingService {
 
     UserStorage userStorage;
 
+    @Transactional
     @Override
     public BookingResponseDto create(Long bookerId, BookingDto bookingDto) {
         Item item = itemStorage.findById(bookingDto.getItemId())
@@ -39,6 +45,7 @@ public class BookingServicempl implements BookingService {
         return BookingMapper.toBookingResponseDto(booking);
     }
 
+    @Transactional
     @Override
     public BookingResponseDto update(Long bookerId, boolean approved, Long bookingId) {
         Booking booking = bookingStorage.findById(bookingId)
@@ -53,6 +60,7 @@ public class BookingServicempl implements BookingService {
         return BookingMapper.toBookingResponseDto(booking);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public BookingResponseDto getBooking(Long userId, Long bookingId) {
         Booking booking = bookingStorage.findById(bookingId)
@@ -64,6 +72,7 @@ public class BookingServicempl implements BookingService {
         return BookingMapper.toBookingResponseDto(booking);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseDto> getBookingsByUser(Long userId, String state) {
         List<Booking> bookings = bookingStorage.findByBookerIdOrderByStartDesc(userId);
@@ -82,6 +91,7 @@ public class BookingServicempl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseDto> getBookingsByOwner(Long userId, String state) {
         User owner = userStorage.findById(userId)

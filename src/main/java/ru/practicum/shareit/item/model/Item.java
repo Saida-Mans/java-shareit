@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item.model;
 import jakarta.persistence.*;
-import lombok.Data;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.user.User;
+import lombok.*;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
@@ -10,9 +10,14 @@ import java.util.List;
  * TODO Sprint add-controllers.
  */
 
-@Data
 @Entity
 @Table(name = "items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Item {
 
     @Id

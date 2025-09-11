@@ -1,17 +1,23 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
 /**
  * TODO Sprint add-bookings.
  */
-@Data
+
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "booking")
 public class Booking {
 

@@ -1,16 +1,19 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserStorage;
 
 @AllArgsConstructor
 @Service
-public class UserServicempl implements UserService {
+public class UserServicelmpl implements UserService {
 
     private final UserStorage userStorage;
 
@@ -40,7 +43,7 @@ public class UserServicempl implements UserService {
         return UserMapper.toUserDto(userStorage.save(user));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public UserDto getById(Long userId) {
         if (userId == null) {
             throw new NotFoundException("Пользователь c таким id " + userId + " не найден");

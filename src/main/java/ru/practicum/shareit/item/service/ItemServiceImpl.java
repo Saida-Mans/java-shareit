@@ -1,20 +1,23 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingStorage;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.repository.BookingStorage;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.repository.ItemStorage;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithCommentDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserStorage;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -59,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(item);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public ItemWithCommentDto itemById(Long userId, Long itemId) {
         User owner = userStorage.getById(userId);
@@ -89,7 +92,7 @@ public class ItemServiceImpl implements ItemService {
                 commentDtos);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> findAll(long userId) {
         if (userStorage.getById(userId) == null) {
@@ -101,7 +104,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> search(String text) {
         if (text == null || text.isBlank()) {
@@ -112,6 +115,8 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
     public CommentDto createComment(Long userId, Long itemId, CommentDto commentDto) {
         User author = userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
