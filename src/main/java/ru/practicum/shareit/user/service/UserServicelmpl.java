@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserStorage;
 
 @AllArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class UserServicelmpl implements UserService {
 
@@ -38,12 +39,12 @@ public class UserServicelmpl implements UserService {
         if (request == null) {
             throw new NotFoundException("Пользователь не найден");
         }
-        User user = userStorage.getById(userId);
+        User user = userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
         UserMapper.updateUserFields(user, request);
         return UserMapper.toUserDto(userStorage.save(user));
     }
 
-    @Transactional(readOnly = true)
     public UserDto getById(Long userId) {
         if (userId == null) {
             throw new NotFoundException("Пользователь c таким id " + userId + " не найден");

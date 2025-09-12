@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class ItemServiceImpl implements ItemService {
 
@@ -50,10 +51,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
-        Item item = repository.getById(itemId);
-        if (item == null) {
-            throw new NotFoundException("Item id = " + itemId + " не найден");
-        }
+        Item item = repository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item с id=" + itemId + " не найден"));
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Владелец с таким id " + userId + "не найден");
         }
@@ -62,17 +61,13 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(item);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public ItemWithCommentDto itemById(Long userId, Long itemId) {
-        User owner = userStorage.getById(userId);
-        if (owner == null) {
-            throw new NotFoundException("User id = " + userId + " не найден");
-        }
-        Item item = repository.getById(itemId);
-        if (item == null) {
-            throw new NotFoundException("Item id=" + itemId + " не найден");
-        }
+        User owner = userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User id=" + userId + " не найден"));
+
+        Item item = repository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item id=" + itemId + " не найден"));
         List<Comment> comments = commentRepository.findAllByItemIdOrderByCreatedDesc(itemId);
         List<CommentDto> commentDtos = comments.stream()
                 .map(ItemMapper::toCommentDto)
@@ -92,19 +87,15 @@ public class ItemServiceImpl implements ItemService {
                 commentDtos);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> findAll(long userId) {
-        if (userStorage.getById(userId) == null) {
-            throw new NotFoundException("User id=" + userId + " не найден");
-        }
-
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User id=" + userId + " не найден"));
         return   repository. findByOwnerId(userId).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> search(String text) {
         if (text == null || text.isBlank()) {

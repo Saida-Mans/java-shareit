@@ -22,13 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class BookingServicempl implements BookingService {
 
-    BookingStorage bookingStorage;
+    private final BookingStorage bookingStorage;
 
-    ItemStorage itemStorage;
+    private final ItemStorage itemStorage;
 
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Transactional
     @Override
@@ -53,14 +54,11 @@ public class BookingServicempl implements BookingService {
         if (!booking.getItem().getOwner().getId().equals(bookerId)) {
            throw new IllegalArgumentException("Booking id=" + bookingId + " нельзя одобрить: пользователь не владелец");
         }
-        if (approved == true) {
-            booking.setStatus(Status.APPROVED);
-        } else booking.setStatus(Status.REJECTED);
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         bookingStorage.save(booking);
         return BookingMapper.toBookingResponseDto(booking);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public BookingResponseDto getBooking(Long userId, Long bookingId) {
         Booking booking = bookingStorage.findById(bookingId)
@@ -72,12 +70,10 @@ public class BookingServicempl implements BookingService {
         return BookingMapper.toBookingResponseDto(booking);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseDto> getBookingsByUser(Long userId, String state) {
         List<Booking> bookings = bookingStorage.findByBookerIdOrderByStartDesc(userId);
         LocalDateTime now = LocalDateTime.now();
-
         return bookings.stream()
                 .filter(booking -> switch (state.toUpperCase()) {
                     case "CURRENT" -> booking.getStart().isBefore(now) && booking.getEnd().isAfter(now);
@@ -91,7 +87,6 @@ public class BookingServicempl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<BookingResponseDto> getBookingsByOwner(Long userId, String state) {
         User owner = userStorage.findById(userId)
