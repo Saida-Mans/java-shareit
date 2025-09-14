@@ -34,4 +34,10 @@ public class ErrorHandler {
                 return new ErrorResponse("Произошла ошибка", exception.getMessage());
         }
 
+        @ExceptionHandler
+        @ResponseStatus(HttpStatus.FORBIDDEN)
+        public ErrorResponse handleAccessDeniedException(final AccessDeniedException exception) {
+                return new ErrorResponse("Доступ запрещен", exception.getMessage());
+        }
+
 }
