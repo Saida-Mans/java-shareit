@@ -23,7 +23,7 @@ public class ItemIntegrationTest {
     private UserService userService;
 
     @Test
-    void itemById(){
+    void itemById() {
         NewUserRequest newUser = new NewUserRequest();
         newUser.setName("Alice");
         newUser.setEmail("alice@example.com");

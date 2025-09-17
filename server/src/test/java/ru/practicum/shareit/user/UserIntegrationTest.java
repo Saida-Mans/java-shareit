@@ -18,6 +18,7 @@ public class UserIntegrationTest {
     @Autowired
     private UserService userService;
     private UserStorage userStorage;
+
     @Test
     void testCreateUser() {
         NewUserRequest newUser = new NewUserRequest();
