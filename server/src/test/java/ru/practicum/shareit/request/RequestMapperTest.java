@@ -48,4 +48,40 @@ public class RequestMapperTest {
         assertEquals("Деревянная лестница", mappedItem.getDescription());
         assertTrue(mappedItem.getAvailable());
     }
+
+    @Test
+    void toItemRequestDto_shouldHandleEmptyItems() {
+        Request request = new Request();
+        request.setId(30L);
+        request.setUserId(7L);
+        request.setDescription("Нужен шуруповерт");
+        request.setCreated(LocalDateTime.now());
+
+        ItemRequestDto dto = RequestMapper.toItemRequestDto(request, List.of());
+
+        assertEquals(30L, dto.getId());
+        assertEquals(7L, dto.getUserId());
+        assertEquals("Нужен шуруповерт", dto.getDescription());
+        assertEquals(request.getCreated(), dto.getCreated());
+        assertNotNull(dto.getItems());
+        assertTrue(dto.getItems().isEmpty());
+    }
+
+    @Test
+    void toItemRequestDto_shouldHandleNullItems() {
+        Request request = new Request();
+        request.setId(20L);
+        request.setUserId(5L);
+        request.setDescription("Нужна дрель");
+        request.setCreated(LocalDateTime.now());
+
+        ItemRequestDto dto = RequestMapper.toItemRequestDto(request, null);
+
+        assertEquals(20L, dto.getId());
+        assertEquals(5L, dto.getUserId());
+        assertEquals("Нужна дрель", dto.getDescription());
+        assertEquals(request.getCreated(), dto.getCreated());
+        assertNotNull(dto.getItems());
+        assertTrue(dto.getItems().isEmpty());
+    }
 }

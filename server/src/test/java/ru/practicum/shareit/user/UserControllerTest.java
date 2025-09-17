@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -12,6 +13,8 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.module.User;
 import ru.practicum.shareit.user.repository.UserStorage;
 import ru.practicum.shareit.user.server.UserService;
+import ru.practicum.shareit.user.dto.NewUserRequest;
+import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -71,6 +74,54 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.name").value("User 1"))
                 .andExpect(jsonPath("$.email").value("user1@example.com"));
         verify(userService).delete(1L);
+    }
+
+    @Test
+    void createUserTest() throws Exception {
+        NewUserRequest newUser = new NewUserRequest();
+        newUser.setName("New User");
+        newUser.setEmail("newuser@example.com");
+
+        UserDto createdUser = new UserDto();
+        createdUser.setId(3L);
+        createdUser.setName("New User");
+        createdUser.setEmail("newuser@example.com");
+
+        when(userService.create(newUser)).thenReturn(createdUser);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"New User\",\"email\":\"newuser@example.com\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.name").value("New User"))
+                .andExpect(jsonPath("$.email").value("newuser@example.com"));
+
+        verify(userService).create(newUser);
+    }
+
+    @Test
+    void updateUserTest() throws Exception {
+        UpdateUserRequest updateUser = new UpdateUserRequest();
+        updateUser.setName("Updated User");
+        updateUser.setEmail("updated@example.com");
+
+        UserDto updatedUser = new UserDto();
+        updatedUser.setId(1L);
+        updatedUser.setName("Updated User");
+        updatedUser.setEmail("updated@example.com");
+
+        when(userService.update(1L, updateUser)).thenReturn(updatedUser);
+
+        mockMvc.perform(patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Updated User\",\"email\":\"updated@example.com\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Updated User"))
+                .andExpect(jsonPath("$.email").value("updated@example.com"));
+
+        verify(userService).update(1L, updateUser);
     }
     }
 

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.server.UserService;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
@@ -17,6 +18,8 @@ public class UserIntegrationTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
     private UserStorage userStorage;
 
     @Test
@@ -48,5 +51,59 @@ public class UserIntegrationTest {
         assertThat(updated.getId()).isNotNull();
         assertThat(updated.getName()).isEqualTo("Alex");
         assertThat(updated.getEmail()).isEqualTo("alexCh@example.com");
+    }
+
+    @Test
+    void testGetById() {
+        NewUserRequest newUser = new NewUserRequest();
+        newUser.setName("Bob");
+        newUser.setEmail("bob@example.com");
+        UserDto created = userService.create(newUser);
+
+        UserDto fetched = userService.getById(created.getId());
+        assertThat(fetched).isNotNull();
+        assertThat(fetched.getId()).isEqualTo(created.getId());
+        assertThat(fetched.getName()).isEqualTo("Bob");
+    }
+
+    @Test
+    void testDeleteUser() {
+        NewUserRequest newUser = new NewUserRequest();
+        newUser.setName("Carol");
+        newUser.setEmail("carol@example.com");
+        UserDto created = userService.create(newUser);
+        Long userId = created.getId();
+
+        UserDto deleted = userService.delete(userId);
+
+        assertThat(deleted).isNotNull();
+        assertThat(deleted.getId()).isEqualTo(userId);
+        assertThat(userStorage.findById(userId)).isEmpty();
+    }
+
+    @Test
+    void testCreateUserWithEmptyEmailThrows() {
+        NewUserRequest newUser = new NewUserRequest();
+        newUser.setName("David");
+        newUser.setEmail("");
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> userService.create(newUser));
+    }
+
+    @Test
+    void testCreateUserWithEmptyNameThrows() {
+        NewUserRequest newUser = new NewUserRequest();
+        newUser.setName("");
+        newUser.setEmail("david@example.com");
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> userService.create(newUser));
+    }
+
+    @Test
+    void testDeleteNotFoundThrows() {
+        org.junit.jupiter.api.Assertions.assertThrows(NotFoundException.class,
+                () -> userService.delete(999L));
     }
 }

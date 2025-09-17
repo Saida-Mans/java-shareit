@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithCommentDto;
 import ru.practicum.shareit.item.repository.ItemStorage;
 import ru.practicum.shareit.item.server.ItemService;
+import ru.practicum.shareit.item.dto.CommentDto;
 import java.util.List;
 
 @WebMvcTest(controllers = ItemController.class)
@@ -34,6 +35,79 @@ public class ItemControllerTest {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @Test
+    void createItemTest() throws Exception {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("New Item");
+        itemDto.setDescription("New Description");
+        itemDto.setAvailable(true);
+        ItemDto responseDto = new ItemDto();
+        responseDto.setId(1L);
+        responseDto.setName("New Item");
+        responseDto.setDescription("New Description");
+        responseDto.setAvailable(true);
+        when(itemService.create(1L, itemDto)).thenReturn(responseDto);
+        mockMvc.perform(post("/items")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("New Item"))
+                .andExpect(jsonPath("$.description").value("New Description"))
+                .andExpect(jsonPath("$.available").value(true));
+        verify(itemService).create(1L, itemDto);
+    }
+
+    @Test
+    void findAllItemsTest() throws Exception {
+        ItemDto item1 = new ItemDto();
+        item1.setId(1L);
+        item1.setName("Item 1");
+        ItemDto item2 = new ItemDto();
+        item2.setId(2L);
+        item2.setName("Item 2");
+        when(itemService.findAll(1L)).thenReturn(List.of(item1, item2));
+        mockMvc.perform(get("/items")
+                        .header(USER_ID_HEADER, 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2));
+        verify(itemService).findAll(1L);
+    }
+
+    @Test
+    void searchItemsTest() throws Exception {
+        ItemDto item1 = new ItemDto();
+        item1.setId(1L);
+        item1.setName("Hammer");
+        when(itemService.search("ham")).thenReturn(List.of(item1));
+        mockMvc.perform(get("/items/search")
+                        .param("text", "ham"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Hammer"));
+        verify(itemService).search("ham");
+    }
+
+    @Test
+    void createCommentTest() throws Exception {
+        CommentDto commentDto = new CommentDto();
+        commentDto.setText("Great item!");
+        CommentDto responseDto = new CommentDto();
+        responseDto.setId(1L);
+        responseDto.setText("Great item!");
+        when(itemService.createComment(1L, 1L, commentDto)).thenReturn(responseDto);
+        mockMvc.perform(post("/items/1/comment")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.text").value("Great item!"));
+        verify(itemService).createComment(1L, 1L, commentDto);
+    }
+
+    @Test
     void updateItemTest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setId(1L);
@@ -50,7 +124,6 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.name").value("Updated Item"))
                 .andExpect(jsonPath("$.description").value("Updated Description"))
                 .andExpect(jsonPath("$.available").value(true));
-
         verify(itemService).update(1L, 1L, itemDto);
     }
 

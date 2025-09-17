@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
 @WebMvcTest(controllers = BookingController.class)
 public class BookingControllerTest {
@@ -26,6 +27,69 @@ public class BookingControllerTest {
     private BookingService bookingService;
 
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
+    @Test
+    void createBookingTest() throws Exception {
+        BookingDto bookingDto = new BookingDto();
+        BookingResponseDto responseDto = new BookingResponseDto();
+        responseDto.setId(1L);
+        when(bookingService.create(1L, bookingDto)).thenReturn(responseDto);
+
+        mockMvc.perform(post("/bookings")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+
+        verify(bookingService).create(1L, bookingDto);
+    }
+
+    @Test
+    void updateBookingTest() throws Exception {
+        BookingResponseDto responseDto = new BookingResponseDto();
+        responseDto.setId(2L);
+        when(bookingService.update(1L, true, 2L)).thenReturn(responseDto);
+        mockMvc.perform(patch("/bookings/2")
+                        .header(USER_ID_HEADER, 1L)
+                        .param("approved", "true")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(2));
+        verify(bookingService).update(1L, true, 2L);
+    }
+
+    @Test
+    void getBookingTest() throws Exception {
+        BookingResponseDto responseDto = new BookingResponseDto();
+        responseDto.setId(3L);
+        when(bookingService.getBooking(1L, 3L)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/bookings/3")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(3));
+        verify(bookingService).getBooking(1L, 3L);
+    }
+
+    @Test
+    void getBookingsByUserTest() throws Exception {
+        BookingResponseDto booking1 = new BookingResponseDto();
+        booking1.setId(5L);
+        BookingResponseDto booking2 = new BookingResponseDto();
+        booking2.setId(6L);
+        List<BookingResponseDto> bookings = List.of(booking1, booking2);
+        when(bookingService.getBookingsByUser(1L, "ALL")).thenReturn(bookings);
+        mockMvc.perform(get("/bookings")
+                        .header(USER_ID_HEADER, 1L)
+                        .param("state", "ALL")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(5))
+                .andExpect(jsonPath("$[1].id").value(6));
+        verify(bookingService).getBookingsByUser(1L, "ALL");
+    }
 
     @Test
     void getBookingsByOwnerTest() throws Exception {
