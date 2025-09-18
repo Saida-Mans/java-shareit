@@ -11,7 +11,6 @@ import ru.practicum.shareit.booking.module.Booking;
 import ru.practicum.shareit.booking.module.Status;
 import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.TestExceptionHandler;
 import ru.practicum.shareit.item.module.Item;
 import ru.practicum.shareit.item.repository.ItemStorage;
@@ -19,12 +18,9 @@ import ru.practicum.shareit.user.module.User;
 import ru.practicum.shareit.user.repository.UserStorage;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
