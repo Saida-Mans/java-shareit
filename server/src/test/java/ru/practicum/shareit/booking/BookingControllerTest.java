@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.controller.BookingController;
@@ -16,8 +17,10 @@ import java.util.List;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.exception.TestExceptionHandler;
 
 @WebMvcTest(controllers = BookingController.class)
+@Import(TestExceptionHandler.class)
 public class BookingControllerTest {
 
     @Autowired
@@ -108,4 +111,37 @@ public class BookingControllerTest {
                 .andExpect(jsonPath("$[1].id").value(2));
         verify(bookingService).getBookingsByOwner(1L, "ALL");
     }
-}
+
+    @Test
+    void createBookingWithoutUserIdShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/bookings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getBookingsByUserWithDifferentState() throws Exception {
+        List<BookingResponseDto> bookings = List.of();
+        when(bookingService.getBookingsByUser(1L, "PAST")).thenReturn(bookings);
+        mockMvc.perform(get("/bookings")
+                        .header(USER_ID_HEADER, 1L)
+                        .param("state", "PAST")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+        verify(bookingService).getBookingsByUser(1L, "PAST");
+    }
+
+    @Test
+    void updateBookingThrowsException() throws Exception {
+        when(bookingService.update(1L, true, 2L))
+                .thenThrow(new RuntimeException("Some error"));
+
+        mockMvc.perform(patch("/bookings/2")
+                        .header(USER_ID_HEADER, 1L)
+                        .param("approved", "true")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+    }

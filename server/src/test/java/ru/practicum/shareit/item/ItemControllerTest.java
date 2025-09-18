@@ -146,4 +146,65 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.comments").isArray());
         verify(itemService).itemById(1L, 1L);
     }
+
+    @Test
+    void createItem_invalidUser_shouldThrow() throws Exception {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Test Item");
+        when(itemService.create(null, itemDto)).thenThrow(new RuntimeException("User not found"));
+
+        mockMvc.perform(post("/items")
+                        .header(USER_ID_HEADER, "")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemDto)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void updateItem_notFound_shouldThrow() throws Exception {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName("Updated");
+
+        when(itemService.update(1L, 999L, itemDto)).thenThrow(new RuntimeException("Item not found"));
+
+        mockMvc.perform(patch("/items/999")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemDto)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void getItemById_notFound_shouldThrow() throws Exception {
+        when(itemService.itemById(1L, 999L)).thenThrow(new RuntimeException("Item not found"));
+
+        mockMvc.perform(get("/items/999")
+                        .header(USER_ID_HEADER, 1L))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void searchItems_emptyText_shouldReturnEmptyList() throws Exception {
+        when(itemService.search("")).thenReturn(List.of());
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", ""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void createComment_invalidUserOrItem_shouldThrow() throws Exception {
+        CommentDto commentDto = new CommentDto();
+        commentDto.setText("Test comment");
+
+        when(itemService.createComment(1L, 999L, commentDto)).thenThrow(new RuntimeException("Item not found"));
+
+        mockMvc.perform(post("/items/999/comment")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentDto)))
+                .andExpect(status().isInternalServerError());
+    }
 }

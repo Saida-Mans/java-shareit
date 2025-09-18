@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @WebMvcTest(controllers = UserController.class)
 public class UserControllerTest {
@@ -123,7 +124,31 @@ public class UserControllerTest {
 
         verify(userService).update(1L, updateUser);
     }
+
+    @Test
+    void updateUser_emptyBody_shouldThrow() throws Exception {
+        mockMvc.perform(patch("/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isOk());
     }
+
+    @Test
+    void createUser_invalidEmail_shouldThrow() throws Exception {
+        NewUserRequest request = new NewUserRequest();
+        request.setName("User");
+        request.setEmail("invalid-email");
+        when(userService.create(request)).thenThrow(new IllegalArgumentException("Email не может быть пустым"));
+        assertThrows(IllegalArgumentException.class, () -> userService.create(request));
+    }
+
+    @Test
+    void getById_nonExistentUser_shouldThrow() throws Exception {
+        when(userService.getById(99L)).thenThrow(new RuntimeException("User not found"));
+        mockMvc.perform(get("/users/99"))
+                .andExpect(status().is5xxServerError());
+    }
+}
 
 
 

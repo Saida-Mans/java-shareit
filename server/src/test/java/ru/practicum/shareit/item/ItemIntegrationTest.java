@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithCommentDto;
@@ -130,5 +131,91 @@ public class ItemIntegrationTest {
                 itemService.createComment(createdUser.getId(), createdItem.getId(), comment))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Cannot comment on unapproved booking");
+    }
+
+    @Test
+    void createItem_userNotFound_shouldThrow() {
+        ItemDto item = new ItemDto();
+        item.setName("Test");
+        item.setAvailable(true);
+
+        assertThatThrownBy(() -> itemService.create(null, item))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("X-Sharer-User-Id не передан");
+
+        assertThatThrownBy(() -> itemService.create(999L, item))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("User id = 999 не найден");
+    }
+
+    @Test
+    void updateItem_notOwnerOrNotFound_shouldThrow() {
+        NewUserRequest userRequest = new NewUserRequest();
+        userRequest.setName("Owner");
+        userRequest.setEmail("owner@example.com");
+        Long ownerId = userService.create(userRequest).getId();
+
+        ItemDto item = new ItemDto();
+        item.setName("Сверло");
+        item.setDescription("Для сверления");
+        item.setAvailable(true);
+        Long itemId = itemService.create(ownerId, item).getId();
+        NewUserRequest otherUserReq = new NewUserRequest();
+        otherUserReq.setName("Intruder");
+        otherUserReq.setEmail("intruder@example.com");
+        Long otherUserId = userService.create(otherUserReq).getId();
+
+        ItemDto update = new ItemDto();
+        update.setName("Updated");
+
+        assertThatThrownBy(() -> itemService.update(otherUserId, itemId, update))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Владелец с таким id");
+
+        assertThatThrownBy(() -> itemService.update(ownerId, 999L, update))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Item с id=999 не найден");
+    }
+
+    @Test
+    void itemById_notFound_shouldThrow() {
+        NewUserRequest userReq = new NewUserRequest();
+        userReq.setName("User");
+        userReq.setEmail("user@example.com");
+        Long userId = userService.create(userReq).getId();
+
+        assertThatThrownBy(() -> itemService.itemById(userId, 999L))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Item id=999 не найден");
+    }
+
+    @Test
+    void search_emptyText_shouldReturnEmptyList() {
+        NewUserRequest userReq = new NewUserRequest();
+        userReq.setName("User");
+        userReq.setEmail("user@example.com");
+        Long userId = userService.create(userReq).getId();
+
+        assertThat(itemService.search("")).isEmpty();
+        assertThat(itemService.search("   ")).isEmpty();
+    }
+
+    @Test
+    void createComment_userOrItemNotFound_shouldThrow() {
+        CommentDto comment = new CommentDto();
+        comment.setText("Test comment");
+
+        assertThatThrownBy(() -> itemService.createComment(999L, 1L, comment))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Пользователь с id=999 не найден");
+
+        NewUserRequest userReq = new NewUserRequest();
+        userReq.setName("User");
+        userReq.setEmail("user@example.com");
+        Long userId = userService.create(userReq).getId();
+
+        assertThatThrownBy(() -> itemService.createComment(userId, 999L, comment))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Item id=999 не найден");
     }
 }

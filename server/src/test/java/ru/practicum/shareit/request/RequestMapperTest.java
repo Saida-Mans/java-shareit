@@ -6,11 +6,15 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.module.Request;
 import ru.practicum.shareit.request.mapper.RequestMapper;
+import ru.practicum.shareit.request.server.RequestService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestMapperTest {
+
+    private RequestService requestService;
 
     @Test
     void mapToRequest() {

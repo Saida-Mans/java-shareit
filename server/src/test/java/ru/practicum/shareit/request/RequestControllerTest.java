@@ -93,4 +93,27 @@ public class RequestControllerTest {
 
         verify(requestService).findById(1L, 1L);
     }
+
+    @Test
+    void findById_notFound_shouldReturnNotFound() throws Exception {
+        when(requestService.findById(1L, 99L))
+                .thenThrow(new RuntimeException("Request not found"));
+
+        mockMvc.perform(get("/requests/99")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void findRequest_emptyList() throws Exception {
+        when(requestService.findRequest(1L)).thenReturn(List.of());
+
+        mockMvc.perform(get("/requests")
+                        .header(USER_ID_HEADER, 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
 }

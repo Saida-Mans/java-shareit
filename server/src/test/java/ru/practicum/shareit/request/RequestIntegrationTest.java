@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.repository.ItemStorage;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.RequestDto;
@@ -112,6 +113,37 @@ public class RequestIntegrationTest {
         assertNotNull(dto);
         assertEquals(savedRequest.getId(), dto.getId());
         assertEquals("Нужен чайник", dto.getDescription());
+    }
+
+    @Test
+    void createRequest_noUserId_shouldThrow() {
+        RequestDto requestDto = new RequestDto();
+        requestDto.setDescription("Тест");
+        assertThrows(IllegalArgumentException.class,
+                () -> requestService.create(null, requestDto));
+    }
+
+    @Test
+    void findById_requestNotFound_shouldThrow() {
+        User user = new User();
+        user.setName("Test");
+        user.setEmail("test@example.com");
+        User saved = userStorage.save(user);
+
+        assertThrows(NotFoundException.class,
+                () -> requestService.findById(saved.getId(), 999L));
+    }
+
+    @Test
+    void findById_noUserId_shouldThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> requestService.findById(null, 1L));
+    }
+
+    @Test
+    void findRequest_noUserId_shouldThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> requestService.findRequest(null));
     }
 }
 

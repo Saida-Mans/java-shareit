@@ -5,24 +5,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.module.Booking;
 import ru.practicum.shareit.booking.module.Status;
 import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.TestExceptionHandler;
 import ru.practicum.shareit.item.module.Item;
 import ru.practicum.shareit.item.repository.ItemStorage;
 import ru.practicum.shareit.user.module.User;
 import ru.practicum.shareit.user.repository.UserStorage;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
+@Import(TestExceptionHandler.class)
 public class BookingIntegrationTest {
 
     @Autowired
@@ -137,5 +143,72 @@ public class BookingIntegrationTest {
 
         assertThrows(RuntimeException.class, () ->
                 bookingService.getBooking(otherUser.getId(), booking.getId()));
+    }
+
+    @Test
+    void createBooking_itemNotAvailable_shouldThrow() {
+        item.setAvailable(false);
+        itemStorage.save(item);
+
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(LocalDateTime.now().plusDays(1));
+        bookingDto.setEnd(LocalDateTime.now().plusDays(2));
+
+        assertThrows(RuntimeException.class, () ->
+                bookingService.create(user.getId(), bookingDto));
+    }
+
+    @Test
+    void create_itemNotFound_shouldThrow() {
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setItemId(999L);
+        assertThrows(RuntimeException.class, () ->
+                bookingService.create(user.getId(), bookingDto));
+    }
+
+    @Test
+    void getBooking_byOwner_shouldSucceed() {
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(LocalDateTime.now().plusDays(1));
+        bookingDto.setEnd(LocalDateTime.now().plusDays(2));
+        BookingResponseDto booking = bookingService.create(user.getId(), bookingDto);
+        BookingResponseDto result = bookingService.getBooking(user.getId(), booking.getId());
+        assertEquals(booking.getId(), result.getId());
+    }
+
+    @Test
+    void updateBooking_byNonOwner_shouldThrow() {
+        BookingDto bookingDto = new BookingDto();
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(LocalDateTime.now().plusDays(1));
+        bookingDto.setEnd(LocalDateTime.now().plusDays(2));
+        BookingResponseDto booking = bookingService.create(user.getId(), bookingDto);
+
+        User otherUser = new User();
+        otherUser.setName("Другой пользователь");
+        otherUser.setEmail("other@example.com");
+        userStorage.save(otherUser);
+
+        assertThrows(RuntimeException.class, () ->
+                bookingService.update(otherUser.getId(), true, booking.getId()));
+    }
+
+    @Test
+    void getBookingsByUser_noBookings_shouldReturnEmpty() {
+        List<BookingResponseDto> bookings = bookingService.getBookingsByUser(999L, "ALL");
+        assertTrue(bookings.isEmpty());
+    }
+
+    @Test
+    void getBookingsByOwner_noItems_shouldThrow() {
+        User noItemUser = new User();
+        noItemUser.setName("Нет вещей");
+        noItemUser.setEmail("empty@example.com");
+        userStorage.save(noItemUser);
+
+        assertThrows(RuntimeException.class, () ->
+                bookingService.getBookingsByOwner(noItemUser.getId(), "ALL"));
     }
 }
