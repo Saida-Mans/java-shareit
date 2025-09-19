@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -12,7 +13,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 /**
  * TODO Sprint add-controllers.
  */
-@RestController
+@Controller
 @AllArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
@@ -29,20 +30,20 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> update(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ResponseEntity<Object> update(@RequestHeader(value = USER_ID_HEADER, required = true) Long userId,
                                          @PathVariable Long itemId,
                                          @RequestBody ItemDto itemDto) {
         return itemClient.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Object> itemById(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ResponseEntity<Object> itemById(@RequestHeader(value = USER_ID_HEADER, required = true) Long userId,
                                            @PathVariable Long itemId) {
         return itemClient.getById(userId, itemId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> findAll(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public ResponseEntity<Object> findAll(@RequestHeader(value = USER_ID_HEADER, required = true) Long userId) {
         return itemClient.findAll(userId);
     }
 
@@ -52,7 +53,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> createComment(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ResponseEntity<Object> createComment(@RequestHeader(value = USER_ID_HEADER, required = true) Long userId,
                                                 @PathVariable Long itemId,
                                                 @Valid @RequestBody CommentDto commentDto) {
         return itemClient.addComment(userId, itemId, commentDto);

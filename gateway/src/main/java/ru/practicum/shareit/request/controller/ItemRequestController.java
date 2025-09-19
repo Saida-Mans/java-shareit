@@ -3,11 +3,12 @@ package ru.practicum.shareit.request.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.ItemRequestClient;
 import ru.practicum.shareit.request.dto.RequestDto;
 
-@RestController
+@Controller
 @RequestMapping("/requests")
 @RequiredArgsConstructor
 public class ItemRequestController {
@@ -22,12 +23,12 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> findRequest(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public ResponseEntity<Object> findRequest(@RequestHeader(value = USER_ID_HEADER, required = true) Long userId) {
         return requestClient.findRequest(userId);
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> findById(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ResponseEntity<Object> findById(@RequestHeader(value = USER_ID_HEADER, required = true) Long userId,
                                            @PathVariable Long requestId) {
         return requestClient.findById(userId, requestId);
     }
